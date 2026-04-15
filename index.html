@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>余陈双人打卡空间 · 双生轨迹</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f7f0e6 0%, #e9dcd0 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            padding: 20px 16px 40px;
+            color: #2e241f;
+        }
+
+        /* 主容器 */
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 双生卡片头部 */
+        .duo-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .character-card {
+            flex: 1;
+            background: rgba(255, 248, 235, 0.9);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 12px 16px;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            border: 1px solid #ffddb0;
+        }
+
+        .character-card.active {
+            background: #fff3e0;
+            border-left: 6px solid #f4a261;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+        }
+
+        .avatar {
+            font-size: 2.4rem;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .name {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .sub {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .switch-btn {
+            background: #e2c7ae;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            margin-top: 8px;
+            font-weight: bold;
+            color: #4a3729;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .switch-btn:active {
+            transform: scale(0.96);
+            background: #d4b48c;
+        }
+
+        /* 智能管家面板 */
+        .assistant-panel {
+            background: #2c3e2f;
+            border-radius: 32px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            color: #fef5e7;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .assistant-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 2;
+        }
+
+        .assistant-emoji {
+            font-size: 2rem;
+            background: #f4b942;
+            border-radius: 60px;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f4b942;
+        }
+
+        .assistant-msg {
+            font-weight: 500;
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+
+        .reminder-badge {
+            background: #e67e22;
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        /* 日期导航 */
+        .date-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 20px 0 12px;
+        }
+
+        .date-title {
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: white;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .nav-buttons button {
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            margin: 0 6px;
+            cursor: pointer;
+            background: #fff0e0;
+            width: 40px;
+            border-radius: 30px;
+            transition: 0.1s;
+        }
+
+        /* 打卡条目卡片 */
+        .day-card {
+            background: white;
+            border-radius: 36px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+            border: 1px solid #ffe0c0;
+        }
+
+        .day-header {
+            background: #fff2e4;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ffe0c0;
+            font-weight: bold;
+        }
+
+        .day-date {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .check-status {
+            font-size: 0.75rem;
+            background: #f0e0d0;
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+
+        .check-status.done {
+            background: #b7d7a8;
+            color: #2c4b1e;
+        }
+
+        .goals-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3e5d8;
+        }
+
+        .goal-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .goal-text {
+            flex: 3;
+            background: #fefaf5;
+            border-radius: 24px;
+            padding: 12px 14px;
+            border: 1px solid #ffefdf;
+            font-size: 0.9rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .goal-img-area {
+            flex: 1;
+            min-width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .upload-label {
+            background: #f4e3d3;
+            padding: 6px 12px;
+            border-radius: 28px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .preview-img {
+            max-width: 70px;
+            max-height: 70px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 1px solid #e2cfb9;
+        }
+
+        .daily-thought {
+            background: #fffbf5;
+            padding: 14px 20px;
+            margin: 8px 16px 16px 16px;
+            border-radius: 24px;
+            border-left: 6px solid #f4a261;
+        }
+
+        .thought-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #b97f47;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .thought-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.85rem;
+            padding: 6px 0;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* 对方动态模块 (互看) */
+        .partner-preview {
+            background: #fff1e6;
+            border-radius: 32px;
+            margin: 20px 0 12px;
+            padding: 14px 18px;
+            border: 1px solid #fadabc;
+        }
+
+        .partner-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .partner-log {
+            font-size: 0.8rem;
+            background: #fffaf2;
+            border-radius: 20px;
+            padding: 10px;
+            color: #5a3e2e;
+        }
+
+        /* 按钮 */
+        .save-day-btn {
+            background: #e9b172;
+            border: none;
+            width: calc(100% - 32px);
+            margin: 0 16px 20px 16px;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .save-day-btn:active {
+            transform: scale(0.97);
+            background: #dc9e5c;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.7rem;
+            color: #8b6f52;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 双生角色区 -->
+    <div class="duo-header">
+        <div class="character-card" id="cardYu">
+            <div class="avatar">🐟✨</div>
+            <div class="name">小余</div>
+            <div class="sub">元气探索者</div>
+            <button class="switch-btn" data-user="yu">切换至此视角</button>
+        </div>
+        <div class="character-card" id="cardChen">
+            <div class="avatar">🌿📘</div>
+            <div class="name">小陈</div>
+            <div class="sub">沉静修行者</div>
+            <button class="switch-btn" data-user="chen">切换至此视角</button>
+        </div>
+    </div>
+
+    <!-- 智能管家区域 -->
+    <div class="assistant-panel" id="assistantPanel">
+        <div class="assistant-text">
+            <span class="assistant-emoji">🤖💬</span>
+            <span class="assistant-msg" id="assistantMsg">管家小智：今日也要加油哟~ 记得打卡记录进步！</span>
+        </div>
+        <div class="reminder-badge" id="reminderBtn">⏰ 未打卡提醒</div>
+    </div>
+
+    <!-- 对方最新动态板块 (互看) -->
+    <div class="partner-preview" id="partnerPreview">
+        <div class="partner-title">🌟 伙伴最新动态 🌟</div>
+        <div class="partner-log" id="partnerLogContent">加载对方动态中...</div>
+    </div>
+
+    <!-- 日期导航 + 当前选中的日期打卡区 -->
+    <div class="date-nav">
+        <div class="date-title" id="currentDateLabel">2026年4月15日</div>
+        <div class="nav-buttons">
+            <button id="prevDayBtn">◀</button>
+            <button id="nextDayBtn">▶</button>
+        </div>
+    </div>
+
+    <!-- 当前用户当前日期的打卡面板 -->
+    <div class="day-card" id="activeDayCard">
+        <div class="day-header">
+            <span class="day-date" id="cardDate"></span>
+            <span class="check-status" id="checkStatusTag">⚪ 未打卡</span>
+        </div>
+        <div class="goals-section" id="goalsSection">
+            <!-- 动态生成目标条目 -->
+            <div class="goal-item">
+                <textarea class="goal-text" placeholder="今日目标/完成事项... 例如：阅读1小时, 健身..." rows="2"></textarea>
+                <div class="goal-img-area">
+                    <label class="upload-label">📸 上传图片 <input type="file" accept="image/*" style="display:none" class="img-upload-input"></label>
+                    <img class="preview-img" style="display:none;" alt="preview">
+                </div>
+            </div>
+            <!-- 可以加一个添加更多条目按钮，更自由，但基本每个日期一排条目够用，也可增加一个动态添加 -->
+            <div style="text-align:center; margin-top:8px;">
+                <button id="addGoalBtn" style="background: none; border: 1px dashed #e2cfb9; border-radius: 40px; padding: 4px 12px; font-size:0.7rem;">➕ 添加今日事项</button>
+            </div>
+        </div>
+        <div class="daily-thought">
+            <div class="thought-label">📖 每日心得 · 小宇宙</div>
+            <textarea class="thought-input" placeholder="记录今天的心情、感悟或小成就..." rows="2"></textarea>
+        </div>
+        <button class="save-day-btn" id="saveDayBtn">✨ 保存今日打卡 ✨</button>
+    </div>
+    <footer>双生轨迹 · 彼此看见，互相激励</footer>
+</div>
+
+<script>
+    // ---------- 数据模型 ----------
+    // 存储结构:  { yu: { "2026-04-15": { goals: [{text, imgData}], thought: "", lastUpdated } }, chen: {...} }
+    const STORAGE_KEY = "YuChenPunchClock";
+    let appData = {
+        yu: {},
+        chen: {}
+    };
+
+    // 当前激活的用户 'yu' 或 'chen'
+    let currentUser = "yu";
+    let currentDisplayDate = new Date(2026, 3, 15); // 2026-04-15 (月索引3)
+    
+    // 辅助函数：日期格式化 YYYY-MM-DD
+    function formatDate(date) {
+        let y = date.getFullYear();
+        let m = String(date.getMonth() + 1).padStart(2, '0');
+        let d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    // 加载本地数据
+    function loadData() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed.yu && parsed.chen) appData = parsed;
+                else appData = { yu: {}, chen: {} };
+            } catch(e) { console.warn(e); }
+        }
+        // 初始化默认示例: 为了让初始界面美观, 如果完全没有数据可以加一条4月15日示例但不用太复杂
+        if (Object.keys(appData.yu).length === 0 && Object.keys(appData.chen).length === 0) {
+            // 仅预置一条示例让小余小陈看到模板
+            const demoYu = {
+                "2026-04-15": {
+                    goals: [{ text: "完成晨间冥想 + 跑步3km", imgData: "" }],
+                    thought: "第一天开启打卡，元气满满！",
+                    lastUpdated: new Date().toISOString()
+                }
+            };
+            const demoChen = {
+                "2026-04-15": {
+                    goals: [{ text: "读《认知觉醒》50页 + 笔记整理", imgData: "" }],
+                    thought: "专注让时间变慢，一起加油。",
+                    lastUpdated: new Date().toISOString()
+                }
+            };
+            appData.yu = demoYu;
+            appData.chen = demoChen;
+        }
+        saveDataToLocal();
+    }
+
+    function saveDataToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    // 获取某用户某日的数据结构 (确保goals存在)
+    function getUserDayData(user, dateStr) {
+        if (!appData[user]) appData[user] = {};
+        if (!appData[user][dateStr]) {
+            appData[user][dateStr] = {
+                goals: [{ text: "", imgData: "" }],
+                thought: "",
+                lastUpdated: new Date().toISOString()
+            };
+        }
+        // 确保goals存在且至少一个条目
+        if (!appData[user][dateStr].goals || appData[user][dateStr].goals.length === 0) {
+            appData[user][dateStr].goals = [{ text: "", imgData: "" }];
+        }
+        return appData[user][dateStr];
+    }
+
+    // 渲染当前用户、当前日期的界面
+    function renderCurrentDay() {
+        const dateObj = currentDisplayDate;
+        const dateStr = formatDate(dateObj);
+        const userData = getUserDayData(currentUser, dateStr);
+        const goals = userData.goals;
+        const thought = userData.thought || "";
+        
+        // 更新头部日期显示
+        const year = dateObj.getFullYear();
+        const month = dateObj.getMonth() + 1;
+        const day = dateObj.getDate();
+        document.getElementById("cardDate").innerText = `${year}年${month}月${day}日`;
+        document.getElementById("currentDateLabel").innerHTML = `${year}.${month}.${day}`;
+        
+        // 更新打卡状态tag: 如果目标有任何非空文本或图片就算有内容(简单判断)
+        let hasContent = false;
+        for(let g of goals) {
+            if((g.text && g.text.trim() !== "") || (g.imgData && g.imgData !== "")) hasContent = true;
+        }
+        if(thought.trim() !== "") hasContent = true;
+        const statusSpan = document.getElementById("checkStatusTag");
+        if(hasContent) {
+            statusSpan.innerHTML = "✅ 已打卡";
+            statusSpan.classList.add("done");
+        } else {
+            statusSpan.innerHTML = "⚪ 未打卡";
+            statusSpan.classList.remove("done");
+        }
+        
+        // 渲染 goals 区域 (动态重建)
+        const goalsContainer = document.getElementById("goalsSection");
+        // 保留“添加按钮”外的所有条目区域, 我们重建条目但保留添加按钮位置，所以获取父容器并清除原条目部分，但保留添加按钮位置更好：手动删除所有.goal-item
+        const existingItems = goalsContainer.querySelectorAll(".goal-item");
+        existingItems.forEach(el => el.remove());
+        
+        // 重新生成每一个goal
+        goals.forEach((goal, idx) => {
+            const goalDiv = document.createElement("div");
+            goalDiv.className = "goal-item";
+            goalDiv.setAttribute("data-goal-idx", idx);
+            // textarea
+            const textarea = document.createElement("textarea");
+            textarea.className = "goal-text";
+            textarea.placeholder = `今日目标/事项 ${idx+1}...`;
+            textarea.rows = 2;
+            textarea.value = goal.text || "";
+            // 图片区域
+            const imgArea = document.createElement("div");
+            imgArea.className = "goal-img-area";
+            const uploadLabel = document.createElement("label");
+            uploadLabel.className = "upload-label";
+            uploadLabel.innerHTML = "📸 上传图片";
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.style.display = "none";
+            const previewImg = document.createElement("img");
+            previewImg.className = "preview-img";
+            if(goal.imgData && goal.imgData !== "") {
+                previewImg.src = goal.imgData;
+                previewImg.style.display = "block";
+            } else {
+                previewImg.style.display = "none";
+            }
+            uploadLabel.appendChild(fileInput);
+            imgArea.appendChild(uploadLabel);
+            imgArea.appendChild(previewImg);
+            goalDiv.appendChild(textarea);
+            goalDiv.appendChild(imgArea);
+            goalsContainer.insertBefore(goalDiv, document.getElementById("addGoalBtn"));
+            
+            // 图片上传逻辑
+            fileInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        previewImg.src = ev.target.result;
+                        previewImg.style.display = "block";
+                        // 实时更新内存数据但不自动保存，等保存按钮
+                        goals[idx].imgData = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            // textarea 实时同步到内存(但最终保存才是持久)
+            textarea.addEventListener("input", (e) => {
+                goals[idx].text = e.target.value;
+            });
+        });
+        
+        // 渲染心得
+        const thoughtInput = document.querySelector(".thought-input");
+        if(thoughtInput) thoughtInput.value = thought;
+        // 移除原先的listener避免重复，改用新监听绑定到保存
+        // 心得实时同步内存
+        if(thoughtInput) {
+            thoughtInput.oninput = (e) => {
+                userData.thought = e.target.value;
+            };
+        }
+        
+        // 重新挂载添加条目按钮功能
+        const addBtn = document.getElementById("addGoalBtn");
+        // 移除旧的clone避免重复
+        const newAddBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+        newAddBtn.id = "addGoalBtn";
+        newAddBtn.addEventListener("click", () => {
+            const currentUserData = getUserDayData(currentUser, formatDate(currentDisplayDate));
+            currentUserData.goals.push({ text: "", imgData: "" });
+            saveDataToLocal();
+            renderCurrentDay(); // 重新渲染
+        });
+        
+        // 保存按钮逻辑
+        const saveBtn = document.getElementById("saveDayBtn");
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        newSaveBtn.id = "saveDayBtn";
+        newSaveBtn.addEventListener("click", () => {
+            // 确保内存中goals内容已绑定（textarea事件会修改，心得input也会修改）
+            // 再次从DOM同步一次文本防止意外（加强）
+            const goalDivs = document.querySelectorAll(".goal-item");
+            for(let i=0;i<goalDivs.length;i++) {
+                const txtArea = goalDivs[i].querySelector(".goal-text");
+                if(txtArea && userData.goals[i]) {
+                    userData.goals[i].text = txtArea.value;
+                }
+            }
+            const thoughtDom = document.querySelector(".thought-input");
+            if(thoughtDom) userData.thought = thoughtDom.value;
+            userData.lastUpdated = new Date().toISOString();
+            saveDataToLocal();
+            renderCurrentDay(); // 刷新状态
+            updateAssistantMessage(true);
+            renderPartnerPreview();
+            // 小提示
+            const msgDiv = document.getElementById("assistantMsg");
+            msgDiv.innerHTML = "🤖 管家小智: 打卡已保存！继续坚持~ 🌟";
+            setTimeout(()=>{if(msgDiv) msgDiv.innerHTML = "🤖 管家小智: 每一步都算数，加油伙伴！";}, 2000);
+        });
+    }
+    
+    // 智能管家提醒与鼓励（结合当日是否打卡）
+    function updateAssistantMessage(isManualSave = false) {
+        const todayStr = formatDate(new Date());
+        const currentDateStr = formatDate(currentDisplayDate);
+        const userTodayData = appData[currentUser]?.[todayStr];
+        let hasTodayContent = false;
+        if(userTodayData) {
+            if((userTodayData.thought && userTodayData.thought.trim() !== "")) hasTodayContent = true;
+            if(userTodayData.goals && userTodayData.goals.some(g => (g.text && g.text.trim()) || g.imgData)) hasTodayContent = true;
+        }
+        const msgSpan = document.getElementById("assistantMsg");
+        const currentUserShow = currentUser === 'yu' ? '小余' : '小陈';
+        if(!hasTodayContent && formatDate(currentDisplayDate) === todayStr) {
+            msgSpan.innerHTML = `⚠️ 管家提醒：${currentUserShow} 今天还未打卡哦！快记录今日的成长吧！💪`;
+        } else if(hasTodayContent && formatDate(currentDisplayDate) === todayStr){
+            msgSpan.innerHTML = `🎉 太棒了！${currentUserShow} 今日已完成打卡！继续发光~ ✨ 管家为你骄傲。`;
+        } else {
+            msgSpan.innerHTML = `🍃 ${currentUserShow}，查看过往努力也很棒。记得日日精进，管家一直在~ 🌈`;
+        }
+    }
+    
+    // 提醒未打卡 (弹窗+管家消息强化)
+    function remindMissed() {
+        const todayStr = formatDate(new Date());
+        const yuToday = appData.yu?.[todayStr];
+        const chenToday = appData.chen?.[todayStr];
+        const yuDone = yuToday && ((yuToday.thought?.trim()) || (yuToday.goals?.some(g=>g.text?.trim()||g.imgData)));
+        const chenDone = chenToday && ((chenToday.thought?.trim()) || (chenToday.goals?.some(g=>g.text?.trim()||g.imgData)));
+        let msg = "";
+        if(!yuDone && !chenDone) msg = "小余和小陈今天都还没打卡！互相提醒一下，一起进步呀！📣";
+        else if(!yuDone) msg = "小余今天未打卡～ 小陈可以鼓励一下搭档哦！🐟✨";
+        else if(!chenDone) msg = "小陈今天未打卡～ 小余快送上一句加油！🌿";
+        else msg = "今日双人都已完成打卡！太棒了，继续携手前进🚀";
+        document.getElementById("assistantMsg").innerHTML = "🤖 " + msg;
+        setTimeout(()=>{
+            updateAssistantMessage();
+        }, 3000);
+    }
+    
+    // 渲染对方最新动态(一条最近的带图片或文字)
+    function renderPartnerPreview() {
+        const partner = currentUser === 'yu' ? 'chen' : 'yu';
+        const partnerName = partner === 'yu' ? '小余' : '小陈';
+        const partnerData = appData[partner];
+        if(!partnerData || Object.keys(partnerData).length === 0) {
+            document.getElementById("partnerLogContent").innerHTML = `${partnerName} 还没有打卡记录，快去打个招呼吧~`;
+            return;
+        }
+        // 按日期排序取最近三条以内的动态
+        let dates = Object.keys(partnerData).sort().reverse();
+        let latestLogs = [];
+        for(let d of dates.slice(0,2)) {
+            const dayInfo = partnerData[d];
+            const goalsText = dayInfo.goals?.map(g=>g.text?.substring(0,30)).filter(t=>t && t.trim()).join("；") || "无文字记录";
+            const thoughtShort = dayInfo.thought ? dayInfo.thought.substring(0,40) : "";
+            const hasImg = dayInfo.goals?.some(g=>g.imgData && g.imgData.length > 100);
+            latestLogs.push(`📅 ${d}: ${goalsText} ${thoughtShort ? '💭'+thoughtShort : ''} ${hasImg ? '📷有配图' : ''}`);
+        }
+        if(latestLogs.length===0) document.getElementById("partnerLogContent").innerHTML = `${partnerName} 暂无打卡动态，快邀请ta一起打卡吧。`;
+        else document.getElementById("partnerLogContent").innerHTML = latestLogs.join("<br>") + `<div style="margin-top:6px; font-style:italic;">👉 你和${partnerName}彼此见证，互相成就</div>`;
+    }
+    
+    // 切换用户
+    function setCurrentUser(user) {
+        currentUser = user;
+        // 更新样式
+        const yuCard = document.getElementById("cardYu");
+        const chenCard = document.getElementById("cardChen");
+        if(user === 'yu') {
+            yuCard.classList.add("active");
+            chenCard.classList.remove("active");
+        } else {
+            chenCard.classList.add("active");
+            yuCard.classList.remove("active");
+        }
+        renderCurrentDay();
+        updateAssistantMessage();
+        renderPartnerPreview();
+    }
+    
+    // 日期变化
+    function changeDate(delta) {
+        let newDate = new Date(currentDisplayDate);
+        newDate.setDate(newDate.getDate() + delta);
+        // 限制不低于2026-04-15
+        const minDate = new Date(2026, 3, 15);
+        if(newDate < minDate) {
+            alert("时光从2026年4月15日开始，不可回溯更早哟～");
+            return;
+        }
+        currentDisplayDate = newDate;
+        renderCurrentDay();
+        updateAssistantMessage();
+    }
+    
+    // 初始化所有事件监听与首次渲染
+    function init() {
+        loadData();
+        // 绑定角色切换按钮
+        document.querySelectorAll("[data-user]").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const user = btn.getAttribute("data-user");
+                setCurrentUser(user);
+            });
+        });
+        document.getElementById("prevDayBtn").addEventListener("click", () => changeDate(-1));
+        document.getElementById("nextDayBtn").addEventListener("click", () => changeDate(1));
+        document.getElementById("reminderBtn").addEventListener("click", remindMissed);
+        // 设置当前用户样式默认小余
+        setCurrentUser("yu");
+        renderPartnerPreview();
+        // 每日首次加载自动提醒今日状态
+        updateAssistantMessage();
+        // 每隔一段时间自动检测鼓励(可选)
+        setInterval(() => {
+            updateAssistantMessage();
+            renderPartnerPreview();
+        }, 60000);
+    }
+    
+    init();
+</script>
+</body>
+</html>
