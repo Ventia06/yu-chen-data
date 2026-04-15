@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>小陈小余双人打卡</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      background: #f6f8fa;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      margin: 0;
+      color: #222;
+    }
+    header {
+      text-align: center;
+      padding: 1.5rem 0 0.5rem;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: #3B82F6;
+    }
+    .date-picker {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .clockin-form {
+      max-width: 800px;
+      background: #fff;
+      margin: 1rem auto;
+      padding: 1rem 2rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #e2e8f080;
+      display: flex;
+      gap: 2rem;
+    }
+    .person-block {
+      flex: 1 1 0;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+    }
+    .person-block h3 {
+      margin: 0 0 0.5rem 0;
+      font-weight: 700;
+      color: #22c55e;
+    }
+    .person-block:nth-child(2) h3 { color: #f59e42; }
+    .img-preview {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      background: #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+    .person-block input[type="file"] {
+      margin-bottom: 0.7rem;
+    }
+    .person-block textarea {
+      resize: vertical;
+      width: 100%;
+      min-height: 60px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 7px;
+      font-size: 1em;
+      background: #fff;
+      margin-bottom: 0.5rem;
+      transition: border 0.2s;
+    }
+    .person-block textarea:focus {
+      border: 1.5px solid #3B82F6;
+      outline: none;
+    }
+    .person-block label {
+      font-size: 0.98em;
+      color: #6b7280;
+    }
+    .clockin-form button {
+      margin: 0 auto;
+      margin-top: 1rem;
+      display: block;
+      background: linear-gradient(90deg, #3B82F6 30%, #06b6d4 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2em;
+      padding: 0.7em 2em;
+      cursor: pointer;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 8px #38bdf880;
+      transition: background 0.2s;
+    }
+    .clockin-form button:active {
+      background: linear-gradient(90deg, #2563eb 30%, #0ea5e9 100%);
+    }
+    .timeline {
+      max-width: 850px;
+      margin: 2rem auto;
+      padding-bottom: 2rem;
+    }
+    .timeline-header {
+      font-size: 1.2em;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: .5rem;
+      padding-left: 5px;
+      letter-spacing: 1.5px;
+      border-left: 4px solid #3B82F6;
+      background: #e0f2fe;
+      border-radius: 6px;
+      margin-top: 2rem;
+    }
+    .timeline-list {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 1.5rem;
+    }
+    .timeline-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #e2e8f055;
+      padding: 1.5em 1.5em 1em;
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.7rem;
+      border-left: 6px solid #a5d6a7;
+      position: relative;
+    }
+    .timeline-card-header {
+      position: absolute;
+      top: -1.2rem;
+      left: 1.2rem;
+      background: #fff;
+      padding: 0.1em 1.1em;
+      border-radius: 8px 8px 8px 0;
+      color: #3B82F6;
+      font-weight: 700;
+      font-size: 1em;
+      box-shadow: 0 0 5px #e0e0e066;
+    }
+    .timeline-person {
+      flex: 1 1 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .6em;
+      max-width: 47%;
+    }
+    .timeline-person h4 {
+      margin: 0;
+      font-size: 1em;
+      color: #22c55e;
+    }
+    .timeline-person:nth-child(2) h4 {
+      color: #f59e42;
+    }
+    .timeline-content {
+      font-size: 1em;
+      color: #334155;
+      margin-bottom: 0.3em;
+      word-break: break-all;
+      background: #f3fced;
+      min-height: 2em;
+      padding: 5px 9px;
+      border-radius: 5px;
+    }
+    .timeline-img {
+      display: block;
+      width: 75px;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 7px;
+      margin-bottom: 0.2em;
+      border: 1.5px solid #e5e7eb;
+      background: #e4ffef;
+    }
+    @media (max-width: 900px) {
+      .clockin-form { flex-direction: column; gap: 1rem; }
+      .timeline-card { flex-direction: column; gap: 0.7rem;}
+      .timeline-person, .timeline-person:nth-child(2) {max-width: 100%;}
+    }
+  </style>
+</head>
+<body>
+  <header>小陈小余 - 每日双人打卡</header>
+  <div class="date-picker">
+    <label for="date">选择打卡日期：</label>
+    <input type="date" id="date" value="" max="">
+    <span id="today-flag"></span>
+  </div>
+
+  <form class="clockin-form" id="clockinForm">
+    <div class="person-block" id="person1block">
+      <h3>小陈</h3>
+      <img class="img-preview" id="img1preview" alt="小陈图片预览">
+      <input type="file" accept="image/*" id="img1" />
+      <label for="content1">内容：</label>
+      <textarea id="content1" placeholder="记录你的今日学习／成长／感悟…"></textarea>
+      <label for="plan1">明日计划：</label>
+      <textarea id="plan1" placeholder="明天关注什么/小目标？"></textarea>
+    </div>
+    <div class="person-block" id="person2block">
+      <h3>小余</h3>
+      <img class="img-preview" id="img2preview" alt="小余图片预览">
+      <input type="file" accept="image/*" id="img2" />
+      <label for="content2">内容：</label>
+      <textarea id="content2" placeholder="记录你的今日学习／成长／感悟…"></textarea>
+      <label for="plan2">明日计划：</label>
+      <textarea id="plan2" placeholder="明天关注什么/小目标？"></textarea>
+    </div>
+    <button type="submit">保存打卡</button>
+  </form>
+
+  <section class="timeline">
+    <div class="timeline-header">📅 打卡时间线</div>
+    <div id="timelineList" class="timeline-list"></div>
+  </section>
+
+  <script>
+    // 设置日期限制和默认值
+    const dateInput = document.getElementById('date');
+    const today = new Date();
+    const pad = n => n.toString().padStart(2, '0');
+    const todayStr = today.getFullYear()+'-'+pad(today.getMonth()+1)+'-'+pad(today.getDate());
+    dateInput.value = todayStr;
+    dateInput.max = todayStr;
+
+    // 数据结构: { [date]: {p1:{img,content,plan}, p2:{img,content,plan}} }
+    const STORAGE_KEY = "clockinRecords";
+    function loadRecords() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    }
+    function saveRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function showImagePreview(fileInput, imgElement) {
+      let file = fileInput.files[0];
+      if (!file) { imgElement.style.display='none'; return;}
+      let reader = new FileReader();
+      reader.onload = function(e) {
+        imgElement.src = e.target.result;
+        imgElement.style.display = 'block';
+      }
+      reader.readAsDataURL(file);
+    }
+    // 预览图片事件绑定
+    img1.onchange = () => showImagePreview(img1, img1preview);
+    img2.onchange = () => showImagePreview(img2, img2preview);
+
+    // 渲染表单内容
+    function fillForm(record) {
+      // 小陈
+      if(record?.p1?.img){
+        img1preview.src = record.p1.img; img1preview.style.display='block';
+      }else{ img1.value=null; img1preview.style.display='none';}
+      content1.value = record?.p1?.content||'';
+      plan1.value = record?.p1?.plan||'';
+      // 小余
+      if(record?.p2?.img){
+        img2preview.src = record.p2.img; img2preview.style.display='block';
+      }else{ img2.value=null; img2preview.style.display='none';}
+      content2.value = record?.p2?.content||'';
+      plan2.value = record?.p2?.plan||'';
+    }
+
+    // 选择日期事件
+    dateInput.onchange = function() {
+      const records = loadRecords();
+      fillForm(records[dateInput.value]);
+      updateTodayFlag();
+    }
+    // 显示挂牌，今天/已打卡提示
+    function updateTodayFlag(){
+      let flag = '';
+      const d = dateInput.value
+      if(d === todayStr) flag = '（今天）';
+      const records = loadRecords();
+      if(records[d]) flag += '✅ 已打卡';
+      document.getElementById('today-flag').innerText=flag;
+    }
+    updateTodayFlag();
+
+    // 保存打卡事件
+    clockinForm.onsubmit = function(e){
+      e.preventDefault();
+      const date = dateInput.value;
+      if(!date) return alert('请选择日期');
+      let records = loadRecords();
+      // 获取图片数据
+      function getBase64(fileInput, preview){
+        if(preview.style.display=='block'&&preview.src) return preview.src;
+        return '';
+      }
+      records[date] = {
+        p1:{
+          img: getBase64(img1, img1preview),
+          content: content1.value,
+          plan: plan1.value
+        },
+        p2:{
+          img: getBase64(img2, img2preview),
+          content: content2.value,
+          plan: plan2.value
+        }
+      };
+      saveRecords(records);
+      alert("打卡保存成功！");
+      updateTodayFlag();
+      renderTimeline();
+    }
+
+    // 渲染时间线
+    function renderTimeline(){
+      let records = loadRecords();
+      let dates = Object.keys(records).sort(); //升序
+      let timelineList = document.getElementById('timelineList');
+      timelineList.innerHTML = '';
+      if(dates.length === 0){
+        timelineList.innerHTML = "<div style='color:#aaa;font-size:1.2em;text-align:center;'>暂无打卡记录</div>";
+        return;
+      }
+      for(let i=0;i<dates.length;i++){
+        let d = dates[i];
+        let rec = records[d];
+        if(!(rec.p1||rec.p2)) continue;
+        let html = `
+        <div class="timeline-card">
+          <div class="timeline-card-header">${d}</div>
+          <div class="timeline-person">
+            <h4>小陈</h4>
+            ${rec.p1?.img?`<img class="timeline-img" src="${rec.p1.img}" alt="小陈图片">`:""}
+            <div class="timeline-content"><b>内容：</b>${rec.p1?.content||'<span style="color:#bbb;">未填写</span>'}</div>
+            <div class="timeline-content" style="background:#fefbe6"><b>计划：</b>${rec.p1?.plan||'<span style="color:#bbb;">未填写</span>'}</div>
+          </div>
+          <div class="timeline-person">
+            <h4>小余</h4>
+            ${rec.p2?.img?`<img class="timeline-img" src="${rec.p2.img}" alt="小余图片">`:""}
+            <div class="timeline-content"><b>内容：</b>${rec.p2?.content||'<span style="color:#bbb;">未填写</span>'}</div>
+            <div class="timeline-content" style="background:#fefbe6"><b>计划：</b>${rec.p2?.plan||'<span style="color:#bbb;">未填写</span>'}</div>
+          </div>
+        </div>
+        `;
+        timelineList.insertAdjacentHTML('afterbegin', html); //倒序呈现
+      }
+    }
+    // 页面加载时自动渲染时间线和表单
+    window.onload = function(){
+      renderTimeline();
+      fillForm(loadRecords()[dateInput.value]);
+      updateTodayFlag();
+    }
+  </script>
+</body>
+</html>
